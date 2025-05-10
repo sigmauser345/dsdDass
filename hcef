@@ -1,0 +1,53 @@
+--// Simple Hitbox Expander
+-- Customize these values
+local HitboxSize = 9 -- Size of the hitbox (cube dimensions)
+local HitboxTransparency = 0.9
+local HitboxColor = BrickColor.new("Really black")
+local HitboxMaterial = Enum.Material.Neon
+local TeamCheck = false -- true = only enemies, false = everyone but you
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Function to apply hitbox changes
+local function expandHitboxes()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if not TeamCheck or (player.Team ~= LocalPlayer.Team) then
+                local hrp = player.Character.HumanoidRootPart
+                pcall(function()
+                    hrp.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+                    hrp.Transparency = HitboxTransparency
+                    hrp.BrickColor = HitboxColor
+                    hrp.Material = HitboxMaterial
+                    hrp.CanCollide = false
+                end)
+            end
+        end
+    end
+end
+
+-- Reset hitboxes to normal on stop
+local function resetHitboxes()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            pcall(function()
+                hrp.Size = Vector3.new(2, 2, 1)
+                hrp.Transparency = 1
+                hrp.BrickColor = BrickColor.new("Medium stone grey")
+                hrp.Material = Enum.Material.Plastic
+                hrp.CanCollide = false
+            end)
+        end
+    end
+end
+
+-- Loop to keep applying hitboxes
+RunService.RenderStepped:Connect(function()
+    expandHitboxes()
+end)
+
+-- Optional: reset when you leave the game
+game:BindToClose(resetHitboxes)
